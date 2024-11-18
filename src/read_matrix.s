@@ -76,6 +76,17 @@ read_matrix:
 
     # mul s1, t1, t2   # s1 is number of elements
     # FIXME: Replace 'mul' with your own implementation
+    addi sp, sp, -8
+    sw a1, 0(sp)
+    sw a2, 4(sp)
+    mv a1, t1
+    mv a2, t2
+    jal mul_function
+    mv s1, a0
+    lw a1, 0(sp)
+    lw a2, 4(sp)
+    addi sp, sp, 8
+
 
     slli t3, s1, 2
     sw t3, 24(sp)    # size in bytes
@@ -143,3 +154,31 @@ error_exit:
     lw s4, 20(sp)
     addi sp, sp, 40
     j exit
+mul_function:
+    addi sp, sp, -16      
+    sw s0, 0(sp)      
+    sw s1, 4(sp)      
+    sw s2, 8(sp)       
+    sw s3, 12(sp)      
+
+    li s0, 0          
+
+mul_loop:
+    andi s3, a2, 1        
+    beqz s3, skip_add    
+    add s0, s0, a1       
+
+skip_add:
+    slli a1, a1, 1        
+    srli a2, a2, 1
+    bnez a2, mul_loop       
+
+    mv a0, s0          
+
+    lw s0, 0(sp)       
+    lw s1, 4(sp)       
+    lw s2, 8(sp)        
+    lw s3, 12(sp)      
+    addi sp, sp, 16     
+
+    jr ra  
